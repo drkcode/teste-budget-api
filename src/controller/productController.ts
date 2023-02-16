@@ -1,12 +1,12 @@
-import { NextFunction, Request, RequestHandler, Response } from "express";
+import { RequestHandler } from "express";
 import { mockend } from "../config/api";
-import { Product } from "../types/Product";
+import { ProductService } from "../services/productService";
 import { CustomResponse } from "../utils/CustomResponse";
 
 export const getProducts: RequestHandler = async (req, res, next) => {
     try {
-        const response = await mockend.get("products");
-        const products: Product[] = response.data;
+        const service = new ProductService(mockend);
+        const products = await service.getProducts();
         return res.status(200).json(new CustomResponse("success", products));
     } catch (error) {
         next(error);
