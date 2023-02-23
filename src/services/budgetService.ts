@@ -1,24 +1,28 @@
-import { AxiosInstance } from "axios";
 import { Product } from "../types/Product";
+import { ProductService } from "./productService";
+import { UserService } from "./userService";
 
 export class BudgetService {
-    constructor(private readonly mockend: AxiosInstance) {}
+    constructor(
+        private readonly userService: UserService,
+        private readonly productService: ProductService
+    ) {}
 
-    async calcBudget(userTax: number, productIds: number[]): Promise<number> {
-        const productsResponse = await this.mockend.get("products");
-        const productsData: Product[] = productsResponse.data;
-        const filteredProductsData = productsData.filter((p) =>
-            productIds.includes(p.id)
-        );
-        const productPrices = filteredProductsData.map((p) => p.price);
-
-        this.validatePrices(productPrices);
-
-        const amount = productPrices.reduce(
-            (amount, price) => amount + price,
-            0
-        );
-        const newAmount = this.applyTax(userTax, amount);
+    async calcBudget(
+        userId: number,
+        productIds: number[]
+    ): Promise<number | null> {
+        const userData = await this.userService.getUserById(userId);
+        const products = await this.productService.filterProducts(productIds);
+        const productPrices = this.getProductPrices(products);
+        if (
+            productIds.length !== productPrices.length ||
+            productIds.length === 0
+        ) {
+            return null;
+        }
+        const amount = this.calculateAmount(productPrices);
+        const newAmount = this.applyTax(userData.tax, amount);
         return newAmount;
     }
 
@@ -36,9 +40,11 @@ export class BudgetService {
         return Number(result.toFixed(0));
     }
 
-    validatePrices(prices: number[]): boolean {
-        const priceInvalid = prices.some((v) => v < 0);
-        if (priceInvalid) throw new Error("Invalid product price.");
-        return true;
+    getProductPrices(products: Product[]): number[] {
+        return products.map((product) => product.price);
+    }
+
+    calculateAmount(prices: number[]): number {
+        return prices.reduce((amount, price) => amount + price, 0);
     }
 }
