@@ -18,11 +18,19 @@ export const getUserBudget: RequestHandler = async (req, res, next) => {
         new ProductService(mockend)
     );
     const request: BudgetRequest = req.body;
+    const { user_id: userId, product_ids: productIds } = request;
     try {
-        const userBudget = await budgetService.calcBudget(
-            request.user_id,
-            request.product_ids
-        );
+        if (!userId || !productIds) {
+            return res
+                .status(422)
+                .json(
+                    new ErrorResponse(
+                        "fail",
+                        "the request json is invalid. check the correct json properties"
+                    )
+                );
+        }
+        const userBudget = await budgetService.calcBudget(userId, productIds);
         if (userBudget) {
             return res.status(200).json(
                 new CustomResponse("success", {

@@ -67,4 +67,20 @@ describe("getUserBudget", () => {
                 );
             });
     });
+
+    it("should return response with an error status fail and a error message if the request json content is invalid", async () => {
+        await supertest(app)
+            .post("/user-budget")
+            .send({
+                user_id: 8,
+            })
+            .expect(422)
+            .expect((res) => {
+                expect(res.body).toHaveProperty("status", "fail");
+                expect(res.body).toHaveProperty(
+                    "message",
+                    "the request json is invalid. check the correct json properties"
+                );
+            });
+    });
 });
