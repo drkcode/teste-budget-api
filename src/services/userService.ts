@@ -21,7 +21,7 @@ export class UserService {
             const user = response.data;
             return user;
         } catch (error) {
-            throw new ResourceNotFoundError("fail", "users not found: " + id);
+            throw new ResourceNotFoundError("fail", "user not found: " + id);
         }
     }
 }
