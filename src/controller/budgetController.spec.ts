@@ -14,7 +14,7 @@ describe("getUserBudget", () => {
                 expect(res.body).toHaveProperty("status", "fail");
                 expect(res.body).toHaveProperty(
                     "message",
-                    "users not found: 102"
+                    "user not found: 102"
                 );
             });
     });
